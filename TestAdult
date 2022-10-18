@@ -1,0 +1,97 @@
+package week8;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
+class testAdult {
+
+	@Test
+	void testDoubleAdultArray() {
+		// create an Adult Array with size of 1
+		// insert one record
+		// now, count = array size
+		//insert another record
+		// check if adult array size is 2
+		// insert another record
+		// check if adult array size is 4
+		Object[] sizeTest = new Object[1];
+		//sizeTest = Adult.AdultArray(sizeTest);
+		sizeTest = Adult.TemplatedArray(sizeTest);
+		assertEquals(2, sizeTest.length);
+		sizeTest = Adult.TemplatedArray(sizeTest);
+		assertEquals(4, sizeTest.length);
+	}
+
+	@Test
+	void testEmptyTemplatedArrayConstructor(){
+		//If array is same size as default size
+		TemplatedArray[] sizeTest = new TemplatedArray[TemplatedArray.DEFAULT_SIZE];
+		assertEquals(10, sizeTest.length);
+		
+	}
+
+	@Test
+	void testTemplatedArrayConstructor() {
+		//If array is same size as initial size given
+		int initialSize = 3;
+		TemplatedArray[] sizeTest = new TemplatedArray[initialSize];
+		if(initialSize < 1) {
+			throw new IndexOutOfBoundsException();
+		}
+		assertEquals(initialSize, sizeTest.length);
+	}
+	
+	@Test
+	void testAddAt(){
+		//If array is full double then add
+		int count = 10;
+		int[] nums = {1, 2, 3, 4, 5};
+		String[] strings = {"1", "2", "3", "4", "5"};
+		TemplatedArray sizeTest = new TemplatedArray();
+		AdultRecord ar = new AdultRecord(nums, strings);
+		sizeTest.addAt(ar, 0);
+		assertEquals(count, ar.size());
+	}
+
+	
+	@Test
+	void testReplaceAt() {
+		//If given value replaces value in array at given index
+		int count = 10;
+		int[] nums = {1, 2, 3, 4, 5};
+		String[] strings = {"1", "2", "3", "4", "5"};
+		TemplatedArray sizeTest = new TemplatedArray();
+		AdultRecord ar = new AdultRecord(nums, strings);
+		sizeTest.addAt(ar, 0);
+		sizeTest.replaceAt("6", 1);
+		assertEquals(count, ar.size());
+	}
+	
+	@Test
+	void testRemoveAt() {
+		//If value is removed from array at given index 
+		int count = 10;
+		int[] nums = {1, 2, 3, 4, 5};
+		String[] strings = {"1", "2", "3", "4", "5"};
+		TemplatedArray sizeTest = new TemplatedArray();
+		AdultRecord ar = new AdultRecord(nums, strings);
+		sizeTest.addAt(ar, 0);
+		sizeTest.removeAt(0);
+		assertEquals(count, ar.size());
+	}
+	
+	@Test
+	void testRemove() {
+		//If given value is removed from array
+		int count = 10;
+		int[] nums = {1, 2, 3, 4, 5};
+		String[] strings = {"1", "2", "3", "4", "5"};
+		TemplatedArray sizeTest = new TemplatedArray();
+		AdultRecord ar = new AdultRecord(nums, strings);
+		sizeTest.addAt(ar, 0);
+		sizeTest.remove("2");
+		assertEquals(count, ar.size());
+	}
+
+}
