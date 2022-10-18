@@ -1,0 +1,278 @@
+package week8;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.StringJoiner;
+
+//Print invalid data first and then print all valid data in reverse.Order: Invalids, Header, Data 
+//Submit JUnit and Adult2.java
+public class Adult<T> extends TemplatedArray<T>{
+	public static void main(String[] args) throws IOException{
+			try {
+				boolean input = false;
+				while(input != true) {
+					Scanner keyboard = new Scanner(System.in);
+					System.out.println("Enter data file name: ");
+					String fileInput = keyboard.nextLine();
+					File file = new File(fileInput);
+					if(file.exists()) {
+						input = true;
+					}else if(fileInput.equals("")) {
+						break;
+					}else {
+						input = false;
+						System.out.println("File is not available.");
+						continue;
+					}
+				
+				FileReader fileReader = new FileReader(file);
+				BufferedReader br = new BufferedReader(fileReader);
+				
+				String line = br.readLine();
+				List<String> headers = Arrays.asList(line.split(","));
+				
+				TemplatedArray data = new TemplatedArray(); // array of records
+				
+				//I researched more into set via docs.oracle for java hashsets
+				//linkedhashset gives ordered and sorted vs hashset only gives unordered and unsorted
+					// List (all the other data in order)
+				int n = 0; // number of lines we are at
+				int count = 0; // number of good processed records we are at
+				while((line = br.readLine()) != null) { // as we read in the new line
+					n += 1;
+					//I researched how to split a comma-separated string and found information on it on Stack Overflow
+					List<String> tempData = Arrays.asList(line.split(",")); // splits the raw line into a list of strings
+					// recordID, age, workclass, fnlwgt, education, education-num, marital-status,
+		 			// occupation, relationship, race, sex, capital-gain, capital-loss, hours-per-week, native-country, income
+					
+					
+					// create the record
+					AdultRecord tempRecord = new AdultRecord();
+						//0, 1, 3, 6, 12, 13, 14
+					String str[] = new String[] {tempData.get(0), tempData.get(2), tempData.get(4), tempData.get(6), 
+							tempData.get(7), tempData.get(8), tempData.get(9), tempData.get(10), tempData.get(14), tempData.get(15)};
+					int num[] = new int[] {Integer.parseInt(tempData.get(1)), Integer.parseInt(tempData.get(3)), Integer.parseInt(tempData.get(5)), Integer.parseInt(tempData.get(11)), 
+							Integer.parseInt(tempData.get(12)),Integer.parseInt(tempData.get(13))};
+					tempRecord.setStrings(str);
+					tempRecord.setNums(num);
+					
+					boolean valid = true;
+					
+					// for each processed_record in data
+						// does processed_record.strings[0] == tempRecord.strings[0]
+					// if yes, it's a duplicate ! bad!
+					// if no, it's not a duplicate, keep going
+					for (int i = 0; i < count; i++) {
+						if(((AdultRecord) data.getAt(i)).getStrings()[0].equals(tempRecord.getStrings()[0])) {
+							String error = new String("Duplicate record ID " + Array.get(tempRecord.getStrings(), 0)+ " at line " + n + ".");
+							System.out.println(error);
+							valid = false;
+							break;
+						}
+					}
+					
+					if (valid) {
+						//valid check for spaces and ?'s
+						for (int j = 0; j < 10; j++) {
+							if (tempRecord.getStrings()[j].isBlank() || tempRecord.getStrings()[j].equals("?")) {
+								String error = new String("Invalid data at line " + n + ".");
+								System.out.println(error);
+								valid = false;
+								break;
+							}
+						}
+					}
+							
+					if (valid) {
+						 // negative check in ints
+						for (int j = 0; j < 6; j++) {
+							if (tempRecord.getNums()[j] < 0) {
+								String error = new String("Invalid data at line " + n + ".");
+								System.out.println(error);
+								valid = false;
+								break;
+							}
+						}
+						//negative check in string[0]
+						long i = Long.valueOf(tempRecord.getStrings()[0]); 
+						if (i < 0) {
+							String error = new String("Invalid data at line " + n + ".");
+							System.out.println(error);
+							valid = false;
+						}
+						
+					}
+					
+					if (valid) {
+						// record id = the other strings combined
+						// 3, 1, 5, 13
+						// 1, 0, 2, 5
+						String correctID = Integer.toString(tempRecord.getNums()[1]) + Integer.toString(tempRecord.getNums()[0]) + 
+								Integer.toString(tempRecord.getNums()[2]) + Integer.toString(tempRecord.getNums()[5]);
+						if (!tempRecord.getStrings()[0].equals(correctID)) {
+							String error = new String("Invalid " + tempRecord.getStrings()[0] + " data at line " + n + ".");
+							System.out.println(error);
+							valid = false;
+						}
+					}
+					while((line = br.readLine()) == null) {
+						System.out.println("Enter (o)utput, (s)ort, (f)ind, or (q)uit: ");
+						fileInput = keyboard.nextLine();
+						if(fileInput.equals("o")) {
+							System.out.println("Enter output file name: ");
+							fileInput = keyboard.nextLine();
+							System.out.println(fileInput);
+							if(fileInput.equals("")) {
+								System.out.println("Data lines read: " + n + "; Valid Adult records read: " + count + "; Adult records in memory: " + data.size());	
+							}else {
+								FileWriter fileWriter = new FileWriter(fileInput);
+								BufferedWriter bw = new BufferedWriter(fileWriter);
+								String text = "Data lines read: " + n + "; Valid Adult records read: " + count + "; Adult records in memory: " + data.size();
+								bw.write(text);
+								bw.close();
+							}
+						}
+						if(fileInput.equals("s")) {
+							System.out.println("Enter sort field (0-15): ");
+							fileInput = keyboard.nextLine();
+							if(Integer.parseInt(fileInput) < 0 && Integer.parseInt(fileInput) > 15) {
+								continue;
+							}else if(!keyboard.hasNextInt()) {
+								continue;
+							}else if(Integer.parseInt(fileInput) >= 0 && Integer.parseInt(fileInput) <= 15) {
+								//sort based on input field
+					
+							}else {
+								continue;
+							}
+						}
+						if(fileInput.equals("f")) {
+							System.out.println("Enter search field (0-15): ");
+							fileInput = keyboard.nextLine();
+							if(Integer.parseInt(fileInput) < 0 && Integer.parseInt(fileInput) > 15) {
+								continue;
+							}else if(!keyboard.hasNextInt()) {
+								continue;
+							}else if(Integer.parseInt(fileInput) >= 0 && Integer.parseInt(fileInput) <= 15) {
+								if(Integer.parseInt(fileInput) == 1 || Integer.parseInt(fileInput) == 3 || Integer.parseInt(fileInput) == 5
+										|| Integer.parseInt(fileInput) == 11 || Integer.parseInt(fileInput) == 12 || Integer.parseInt(fileInput) == 13) {
+									System.out.println("Enter non-negative field value: ");
+									fileInput = keyboard.nextLine();
+									if(Integer.parseInt(fileInput) < 0) {
+										int fieldValue = Integer.parseInt(fileInput) * -1;
+										//search for given field value
+									}else {
+										continue;
+									}	
+								}else {
+									System.out.println("Enter exact text on which to search: ");
+									fileInput = keyboard.nextLine();
+									if(fileInput.equals("")) {
+										continue;
+									}
+									int searchNum = 0;
+									//search for given field value
+									
+									System.out.println("Adult records found: " + searchNum);
+								}
+							}else {
+								continue;
+							}
+						}
+						if(fileInput.equals("q")) {
+							System.out.println("Thanks for using Adult.");
+							break;
+						}
+					}
+					// TODO: OTHER CHECKS HERE !!! valid = true
+					// it is not a duplicate, is the data valid?
+					
+					
+					// it passed all three checks, so we know it's good, we insert the record
+					if (valid) {
+						data.addAt(tempRecord, count);
+						count++;
+					}
+
+					}
+				
+//				Printing the header prior to all the data in reverse order
+				String delimiter = "; ";
+				StringJoiner joiner = new StringJoiner(delimiter);
+				headers.forEach(item -> joiner.add(String.valueOf(item)));
+				System.out.println(joiner.toString() + "\n");
+				//Printing all the data in reverse order
+				for(int i = count - 1; i >= 0; i--) 
+					{
+						System.out.println(data.getAt(i).toString());
+					}
+					br.close();
+				}
+				}catch (IOException e) {
+				// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+			
+}
+					
+}
+
+class AdultRecord
+{
+	private int[] nums; // holds the numeric data, in column order //needs to be 6 
+	private String[] strings; // holds the string data, in column order // needs to be 11
+
+	AdultRecord(int[] nums, String[] strings) {
+		this.nums = nums;
+		this.strings = strings;
+	}
+
+	public AdultRecord() {
+		// TODO Auto-generated constructor stub
+		nums = new int[6];
+		strings = new String[11];
+	}
+
+	public int[] getNums() {
+		return nums;
+	}
+
+	public void setNums(int[] nums) {
+		this.nums = nums;
+	}
+
+	public String[] getStrings() {
+		return strings;
+	}
+
+	public void setStrings(String[] strings) {
+		this.strings = strings;
+	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return strings[0] + ";" + nums[0] + ";" + strings[1] + ";" +  nums[1] + ";"+  strings[2] + ";" +  nums[2]
+				+ ";" +  strings[3] + ";" +  strings[4] + ";" +  strings[5] + ";" +  strings[6] + ";" +  strings[7] + ";"
+				+ ";" +  nums[3] + ";" +  nums[4] + ";" +  nums[5] + ";" +  strings[8] + ";" +  strings[9];
+	}
+
+	public Integer size() {
+		// TODO Auto-generated method stub
+		return strings.length + nums.length;
+	}
+
+}
+
