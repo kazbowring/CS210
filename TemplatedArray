@@ -1,0 +1,225 @@
+package week8;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+import week4.Node;
+
+public class TemplatedArray<T> implements AdultADT<T> {
+	private int count; // how many are full
+	private int size; // how many spaces there are
+	private Node<T> tail;
+	private Node<T> head;
+	final static int DEFAULT_SIZE = 10;
+	private Object [] data;
+
+	
+	
+	public TemplatedArray() {
+		// TODO Auto-generated constructor stub
+		data = new Object[DEFAULT_SIZE];
+		count = 0;
+	}
+	
+	public TemplatedArray(int initialSize) {
+		// TODO Auto-generated constructor stub
+		if(initialSize < 1) { // can't have 0 elements, can't have negative elements
+			throw new ArrayIndexOutOfBoundsException();
+		}
+		data = new Object[initialSize];
+		count = 0;
+	}
+
+	public static Object [] TemplatedArray(Object [] currentAdultArray) {
+		// find out length of old array (currentAdultArray)
+		Object[] newArray = Arrays.copyOf(currentAdultArray, currentAdultArray.length * 2);
+		System.gc();
+		// create a new empty array with double the old array length
+		// copy all the data over from old into new
+		// return the new array
+		return newArray;
+	}
+	//Check is the current array full. Count = array.size 
+	// Double array if full then insert. Else just insert
+	
+//	public void addRecord(int[] nums, String[] strings) {
+//		if(count == data.length) {
+//			data = AdultArray(data);
+//		}
+//		data[count] = new AdultRecord(nums, strings);
+//		count++;
+//	}
+//
+//	public Object getRecord(int index) {
+//		return data[index];
+//	}
+	
+	
+	//Most taken from in class notes
+	@Override
+	public void addAt(T value, int index) {
+		// TODO Auto-generated method stub
+		if(index < 0 || index > count) {
+			throw new IndexOutOfBoundsException();
+		}
+		if(value == null)
+		{
+			return;
+		}
+		if(contains(value)) {
+			return;
+		}
+		Node<T> newNode = new Node(value);
+		if(head == null) {
+			head = newNode;
+			tail = newNode;
+			count++;
+			return;
+		}
+		
+		int i = 0;
+		Node<T> prev = null;
+		Node<T> current = head;
+		while(i < index) {
+			prev = current;
+			current = current.getNext();
+			i++;
+		}
+		if(current == null) {
+			tail.setNext(newNode);
+			tail = newNode;
+		}else if(prev == null) {
+			newNode.setNext(head);
+			head = newNode;
+		}else {
+			prev.setNext(newNode);
+			newNode.setNext(current);
+		}
+		if(count == data.length) {
+			data = TemplatedArray(data);
+		}
+		data[index] = current;
+		count++;
+	}
+	
+	public T getAt(int index) {
+		Node<T> tempNode = head;
+		if (index < 0 || index >= count) {
+			throw new IndexOutOfBoundsException();
+		}
+		
+		for (int i = 0; i < index; i++) {
+			tempNode = tempNode.getNext();
+		}
+		
+		return tempNode.getData();
+	}
+
+	@Override
+	public void replaceAt(T value, int index) {
+		// TODO Auto-generated method stub
+		if(index < 0 || index > count) {
+			throw new IndexOutOfBoundsException();
+		}
+		if(value == null)
+		{
+			return;
+		}
+		if(contains(value)) {
+			return;
+		}
+		
+		Node<T> current = head;
+		int i = 0;
+		while(current != null && i < index) {
+			current = current.getNext();
+			i++;
+		}
+		Node<T> newNode = new Node(value);
+		if(head == null) {
+			head = newNode;
+			tail = newNode;
+			return;
+		}
+	}
+
+	@Override
+	public Object removeAt(int index) {
+		// TODO Auto-generated method stub
+		if(index < 0 || index >= count) {
+			throw new IndexOutOfBoundsException();
+		}
+		Node<T> prev = null;
+		Node<T> current = head;
+		for(int i = 0; i < index; i++) {
+			while(current != null) {
+				prev = current;
+				current = current.getNext();
+			}
+			if(current == null) {
+				if(prev != null) {
+					prev.setNext(current.getNext());
+					if(tail == current) {
+						tail = prev;
+					}
+				}else {
+					head = current.getNext();
+					if(count == 1) {
+						tail = null;
+					}
+				}
+				return null;
+			}
+		}
+		count--;
+		return data[index] = null;
+	}
+
+	@Override
+	public T remove(T value){//O(n)
+		// TODO Auto-generated method stub
+		Node<T> prev = null;
+		Node<T> current = head;
+		while(contains(value)) {
+			while(current != null && !Objects.equals(value, current.getData())) {
+				prev = current;
+				current = current.getNext();
+			}
+			if(current == null) {
+				return null;
+			}
+			if(prev != null) {
+				prev.setNext(current.getNext());
+				if(tail == current) {
+					tail = prev;
+				}
+			}else {
+				head = current.getNext();
+				if(count == 1) {
+					tail = null;
+				}
+			}
+		}
+		count--;
+		return null;
+	}
+
+	@Override
+	public boolean contains(T target) {
+		// TODO Auto-generated method stub
+		Node<T> current = head;
+		while(current != null) {
+			if(Objects.equals(current.getData(), target)) {
+				return true;
+			}
+			current = current.getNext();
+		}
+		return false;
+	}
+
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return size;
+	}
+}
