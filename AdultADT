@@ -1,0 +1,15 @@
+package week8;
+
+import week4.EmptySetException;
+import week4.SetADT;
+
+//Most taken from in class notes
+public interface AdultADT<T> {
+	
+	void addAt(T value, int index);
+	public void replaceAt(T value, int index);
+	public Object removeAt(int index);
+	public Object remove(T target);
+	int size();
+	boolean contains(T target);
+}
